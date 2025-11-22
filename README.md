@@ -1,6 +1,6 @@
 # Apple Music Playlist Importer
 
-[#Complete Postman Guide: How to Use the Spotify API to Get a User's Playlists (With OAuth 2.0 Authentication)](https://gist.github.com/tshego3/d663545db6489c1b1119d07818ce3990)
+- [Complete Postman Guide: How to Use the Spotify API to Get a User's Playlists (With OAuth 2.0 Authentication)](https://gist.github.com/tshego3/d663545db6489c1b1119d07818ce3990)
 
 A utility to extract and convert Apple Music playlists to Spotify format.
 
