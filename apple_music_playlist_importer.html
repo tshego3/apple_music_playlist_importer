@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Music Playlist Importer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .instructions {
+            margin-bottom: 30px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .playlist-section {
+            margin-top: 30px;
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .playlist-header h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            flex: 1;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .song-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .song-table thead {
+            background: #f8f9fa;
+        }
+
+        .song-table th {
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .song-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .song-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .song-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .song-artist {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .search-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .search-link:hover {
+            text-decoration: underline;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        .file-upload-section {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+
+        .file-upload-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-upload-section input[type="file"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #processBtn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+            margin-left: 10px;
+        }
+
+        #processBtn:hover:not(:disabled) {
+            background: #764ba2;
+        }
+
+        #processBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #uploadStatus {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        #uploadStatus.success {
+            color: #28a745;
+        }
+
+        #uploadStatus.error {
+            color: #dc3545;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .song-table {
+                font-size: 12px;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Apple Music Playlist Importer</h1>
+        </header>
+
+        <div class="content">
+            <div class="info-box">
+                <strong>Info:</strong> Since Apple Music's AppleScript API is limited, use the links below to search for
+                each song in Apple Music on your device or web.
+            </div>
+
+            <div class="instructions">
+                <strong>How to add songs:</strong>
+                <ol>
+                    <li>Upload a Spotify playlist JSON export file using the button below</li>
+                    <li>Click "Process Songs" to extract and load the playlist</li>
+                    <li>Click the "Search" link for each song</li>
+                    <li>Apple Music will open and search for the song</li>
+                    <li>Click the "+" button to add it to your library or a playlist</li>
+                    <li>Or copy the song/artist names and search manually</li>
+                </ol>
+            </div>
+
+            <div class="file-upload-section">
+                <label for="jsonFile">Select Spotify Playlist JSON File:</label>
+                <input type="file" id="jsonFile" accept=".json" />
+                <button id="processBtn" disabled>Process Songs</button>
+                <div id="uploadStatus"></div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="totalSongs">0</div>
+                    <div class="stat-label">Total Songs</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="totalArtists">0</div>
+                    <div class="stat-label">Artists</div>
+                </div>
+            </div>
+
+            <div class="playlist-section">
+                <div class="playlist-header">
+                    <h2>Playlist Songs</h2>
+                </div>
+
+                <table class="song-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Song Name</th>
+                            <th>Artists</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="songsList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer">
+            <strong>Tip:</strong> Open this file in a web browser and click song links to add to Apple Music. You can
+            also copy song names and artists to search manually.
+        </div>
+    </div>
+
+    <script>
+        let songs = [];
+
+        function extractSongsFromJSON(jsonData) {
+            const extractedSongs = [];
+
+            if (jsonData.items && Array.isArray(jsonData.items)) {
+                jsonData.items.forEach(item => {
+                    if (item.track && item.track.name) {
+                        const songName = item.track.name;
+                        const artists = item.track.artists
+                            .map(artist => artist.name)
+                            .join(", ");
+
+                        if (songName && artists) {
+                            extractedSongs.push({
+                                name: songName,
+                                artists: artists
+                            });
+                        }
+                    }
+                });
+            }
+
+            return extractedSongs;
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const status = document.getElementById('uploadStatus');
+
+            if (!file) {
+                status.textContent = '';
+                document.getElementById('processBtn').disabled = true;
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    const extractedSongs = extractSongsFromJSON(jsonData);
+
+                    if (extractedSongs.length > 0) {
+                        status.textContent = `✓ File loaded successfully! Found ${extractedSongs.length} songs.`;
+                        status.className = 'success';
+                        document.getElementById('processBtn').disabled = false;
+                        document.getElementById('processBtn').dataset.songs = JSON.stringify(extractedSongs);
+                    } else {
+                        status.textContent = '✗ No valid songs found in the JSON file.';
+                        status.className = 'error';
+                        document.getElementById('processBtn').disabled = true;
+                    }
+                } catch (error) {
+                    status.textContent = '✗ Invalid JSON file. Please check the file format.';
+                    status.className = 'error';
+                    document.getElementById('processBtn').disabled = true;
+                }
+            };
+
+            reader.onerror = function () {
+                status.textContent = '✗ Error reading file.';
+                status.className = 'error';
+                document.getElementById('processBtn').disabled = true;
+            };
+
+            reader.readAsText(file);
+        }
+
+        function processSongs() {
+            const processBtn = document.getElementById('processBtn');
+            const songsData = processBtn.dataset.songs;
+
+            if (songsData) {
+                songs = JSON.parse(songsData);
+                renderPlaylist();
+                document.getElementById('uploadStatus').textContent = '✓ Playlist loaded and ready!';
+                document.getElementById('uploadStatus').className = 'success';
+            }
+        }
+
+        function renderPlaylist() {
+            const songsList = document.getElementById('songsList');
+            const uniqueArtists = new Set();
+
+            songs.forEach((song, index) => {
+                song.artists.split(',').forEach(artist => {
+                    uniqueArtists.add(artist.trim());
+                });
+
+                const row = document.createElement('tr');
+                const searchQuery = `${song.name} ${song.artists}`;
+                const appleMusicUrl = `https://music.apple.com/za/search?term=${encodeURIComponent(searchQuery)}`;
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="song-name">${song.name}</td>
+                    <td><span class="song-artist">${song.artists}</span></td>
+                    <td>
+                        <a href="${appleMusicUrl}" class="search-link" target="_blank">Search</a>
+                    </td>
+                `;
+
+                songsList.appendChild(row);
+            });
+
+            document.getElementById('totalSongs').textContent = songs.length;
+            document.getElementById('totalArtists').textContent = uniqueArtists.size;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const jsonFileInput = document.getElementById('jsonFile');
+            const processBtn = document.getElementById('processBtn');
+
+            jsonFileInput.addEventListener('change', handleFileUpload);
+            processBtn.addEventListener('click', processSongs);
+
+            renderPlaylist();
+        });
+    </script>
+</body>
+
+</html>
