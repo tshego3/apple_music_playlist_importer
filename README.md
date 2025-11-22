@@ -10,7 +10,7 @@ A utility to extract Spotify playlist data (via Spotify API) and convert it to A
 
 Since Apple Music's AppleScript API is limited, use the web interface to search and add songs:
 
-1. Open `apple_music_playlist_importer.html` in a web browser
+1. Open `index.html` in a web browser
 2. Upload your Spotify playlist JSON export file
 3. Click "Process Songs" to extract and load the playlist
 4. Click the "Search" link for each song
